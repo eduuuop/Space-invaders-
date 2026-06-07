@@ -46,10 +46,10 @@ class Spaceship(pygame.sprite.Sprite):#isso é meio confuso....
     def update(self):
 
         #velocidade do movimento da nave
-        speed = 8
+        speed = 4
 
         #tempo de recoil 
-        cooldown = 300 #milisegundos
+        cooldown = 900 #milisegundos
 
         #get key press
         key = pygame.key.get_pressed()
@@ -124,6 +124,7 @@ class Alien_Bullets(pygame.sprite.Sprite):#isso eé meio confuso....
         if self.rect.top > screen_height:
             self.kill()  
         if pygame.sprite.spritecollide(self, spaceship_group, False,pygame.sprite.collide_mask ):  
+             self.kill()
              #dano da nave espacial
              spaceship.health_remaining -= 1
 
