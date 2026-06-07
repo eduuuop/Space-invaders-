@@ -40,7 +40,7 @@ class Spaceship(pygame.sprite.Sprite):#isso é meio confuso....
         self.rect = self.image.get_rect() #hitbox retangular da nave
         self.rect.center = [x, y]#dizendo para estar no centro
         self.health_start = health
-        self.health_remaining = health/2
+        self.health_remaining = health
         self.last_shoot = pygame.time.get_ticks()
 
     def update(self):
@@ -67,6 +67,9 @@ class Spaceship(pygame.sprite.Sprite):#isso é meio confuso....
             bullet_group.add(bullet)
             self.last_shoot = time_now
 
+
+        #alinhando a hitbox com a imagem da nave 
+        self.mask = pygame.mask.from_surface(self.image)
 
         #draw health bar
         pygame.draw.rect(screen, red,(self.rect.x, (self.rect.bottom + 10), self.rect.width, 15))
@@ -107,7 +110,7 @@ class Aliens(pygame.sprite.Sprite):#isso eé meio confuso....
             self.move_direction *= -1
             self.move_counter *= self.move_direction
         
-#criar o tiro do moinimigo
+#criar o tiro do inimigo
 class Alien_Bullets(pygame.sprite.Sprite):#isso eé meio confuso....
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
@@ -119,7 +122,10 @@ class Alien_Bullets(pygame.sprite.Sprite):#isso eé meio confuso....
     def update(self):
         self.rect.y += 2
         if self.rect.top > screen_height:
-            self.kill()     
+            self.kill()  
+        if pygame.sprite.spritecollide(self, spaceship_group, False,pygame.sprite.collide_mask ):  
+             #dano da nave espacial
+             spaceship.health_remaining -= 1
 
 
 
@@ -143,7 +149,7 @@ create_aliens()
 
 
 #criando o jogador
-spaceship = Spaceship(int(screen_widht / 2), screen_height - 100, 3)
+spaceship = Spaceship(int(screen_widht / 2), screen_height - 100, 10)
 spaceship_group.add(spaceship)
 
 
@@ -156,6 +162,9 @@ while run:
     #draw background
     draw_bg()
     
+     #UPDATE SPACESHIP
+    spaceship.update() 
+
     #criar balas alieniginas aleatorias
     #registrar o horario
     time_now = pygame.time.get_ticks()
@@ -173,8 +182,7 @@ while run:
     alien_group.draw(screen)
     alien_bullet_group.draw(screen)
 
-    #UPDATE SPACESHIP
-    spaceship.update() 
+   
 
     #atualizar grupos de sprites
     bullet_group.update()
