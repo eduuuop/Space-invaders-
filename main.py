@@ -71,11 +71,18 @@ class Spaceship(pygame.sprite.Sprite):#isso é meio confuso....
         #alinhando a hitbox com a imagem da nave 
         self.mask = pygame.mask.from_surface(self.image)
 
-        #draw health bar
+        #desenhando a barra de vida
         pygame.draw.rect(screen, red,(self.rect.x, (self.rect.bottom + 10), self.rect.width, 15))
         if self.health_remaining > 0:
             pygame.draw.rect(screen, green,(self.rect.x,(self.rect.bottom + 10), int(self.rect.width * (self.health_remaining / self.health_start)), 15))
-        
+        elif self.health_remaining <= 0:
+            explosion = Explosion(self.rect.centerx, self.rect.centery, 5)
+            Explosion_group.add(explosion)
+            self.kill()
+
+
+
+
 #criar o tiro do moço
 class Bullets(pygame.sprite.Sprite):#isso eé meio confuso....
     def __init__(self,x,y):
@@ -92,6 +99,13 @@ class Bullets(pygame.sprite.Sprite):#isso eé meio confuso....
 
         if pygame.sprite.spritecollide(self, alien_group, True):
             self.kill()
+            explosion = Explosion(self.rect.centerx, self.rect.centery, 2)
+#1-parâmetro = x, self.rect.centerx = a imagem acontecera no seu centroX, dentro de sua largura
+# 2-parâmetro = a imagem estara no centro deste objeto no centro de sua altura. 
+            Explosion_group.add(explosion)
+
+
+
 
 #criando os inimigos
 class Aliens(pygame.sprite.Sprite):#isso eé meio confuso....
@@ -127,6 +141,46 @@ class Alien_Bullets(pygame.sprite.Sprite):#isso eé meio confuso....
              self.kill()
              #dano da nave espacial
              spaceship.health_remaining -= 1
+             explosion = Explosion(self.rect.centerx, self.rect.centery, 1)
+             Explosion_group.add(explosion)
+
+#criando explosão
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self,x,y, size):
+        pygame.sprite.Sprite.__init__(self)
+        self.images = []
+        for num in range(1,6):
+            img = pygame.image.load(f"img/exp{num}.png")
+            if size == 1:
+                img = pygame.transform.scale(img,(20,20))
+            if size == 2:
+                img = pygame.transform.scale(img,(40,40))
+            if size == 3:
+                img = pygame.transform.scale(img,(160,160))
+            #adicionar a imagem a lista
+            self.images.append(img)
+        self.index = 0            
+        self.image = self.images[self.index]
+        self.rect = self.image.get_rect() 
+        self.rect.center = [x, y]
+        self.counter = 0
+
+
+    def update(self):
+        Explosion_speed = 3
+        #atualização das imagens, fps
+        self.counter += 1 
+
+        if self.counter >= Explosion_speed and self.index < len(self.images) - 1:
+            self.counter = 0
+            self.index += 1
+            self.image= self.images[self.index] #a imagem sera aquela imagem pertencente a contagem da lista de frames. se imagem da posição 1 = frame de explosão 1
+
+        if self.index >= len(self.images) - 1 and self.counter >= Explosion_speed:
+            #se o índice de imagens for maior         |E| se meu contador for maior ou 
+            #ou igual a quantidade de imagens menos 1 | |igual a minha v. de ex.
+            self.kill()
+
 
 
 
@@ -137,6 +191,7 @@ spaceship_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
 alien_group = pygame.sprite.Group()
 alien_bullet_group = pygame.sprite.Group()
+Explosion_group = pygame.sprite.Group()
 
 def create_aliens():
     #gerar aliens
@@ -182,6 +237,7 @@ while run:
     bullet_group.draw(screen)
     alien_group.draw(screen)
     alien_bullet_group.draw(screen)
+    Explosion_group.draw(screen)
 
    
 
@@ -190,7 +246,10 @@ while run:
     alien_group.update()
     alien_bullet_group.update()
     pygame.display.update()
-   
+    Explosion_group.update()
+
+
+
 
 
     #event handlers
