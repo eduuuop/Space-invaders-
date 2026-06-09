@@ -55,7 +55,7 @@ def draw_text(text, font, text_col, x, y):
 class Spaceship(pygame.sprite.Sprite):
     def __init__(self,x,y,health):
         pygame.sprite.Sprite.__init__(self)
-        self.image= pygame.image.load("img/spaceship.png")
+        self.image = pygame.image.load("img/spaceship.png")
         self.rect = self.image.get_rect()
         self.rect.center = [x, y]
         self.health_start = health
@@ -64,7 +64,7 @@ class Spaceship(pygame.sprite.Sprite):
 
     def update(self):
         speed = 4
-        cooldown = 500
+        cooldown = 50
 
         result = 0
 
@@ -121,16 +121,16 @@ class Aliens(pygame.sprite.Sprite):
         self.image = pygame.image.load("img/alien" + str(random.randint(1,5)) + ".png") 
         self.rect = self.image.get_rect() 
         self.rect.center = [x, y]
-        self.move_counter = 0
-        self.move_direction = 1
+        self.move_counter = 0 #armazena quanto andou
+        self.move_direction = 1 #direção
     
     def update(self):
-        self.rect.x += self.move_direction
+        self.rect.x += self.move_direction #mova X pixel para direção atual
         self.move_counter += 1
         if abs(self.move_counter) > 75:
-            self.move_direction *= -1
+            self.move_direction *= -1 #sempre inverte a direção --> (+1) * (-1) = (-1)*(-1) = +1 
             self.move_counter *= self.move_direction
-
+                    #não importa a ordem nesse caso.
 
 class Alien_Bullets(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -140,8 +140,8 @@ class Alien_Bullets(pygame.sprite.Sprite):
         self.rect.center = [x, y]
 
     def update(self):
-        self.rect.y += 2
-        if self.rect.top > screen_height:
+        self.rect.y += 5 #velocidade do tiro
+        if self.rect.top > screen_height:#se não houve contato kill.
             self.kill()  
         if pygame.sprite.spritecollide(self, spaceship_group, False, pygame.sprite.collide_mask):  
              self.kill()
@@ -158,11 +158,11 @@ class Explosion(pygame.sprite.Sprite):
         for num in range(1,6):
             img = pygame.image.load(f"img/exp{num}.png")
             if size == 1:
-                img = pygame.transform.scale(img,(20,20))
+                img = pygame.transform.scale(img,(20,20))#explosão no player
             if size == 2:
-                img = pygame.transform.scale(img,(40,40))
+                img = pygame.transform.scale(img,(40,40))#explosão no inimigo
             if size == 3:
-                img = pygame.transform.scale(img,(160,160))
+                img = pygame.transform.scale(img,(160,160))#explosão game over do player
             self.images.append(img)
         self.index = 0            
         self.image = self.images[self.index]
@@ -200,9 +200,7 @@ create_aliens()
 spaceship = Spaceship(int(screen_widht / 2), screen_height - 100, 10)
 spaceship_group.add(spaceship)
 
-# BUG 2 CORRIGIDO: countdown_timer não tinha valor inicial, causando
-# NameError na primeira vez que o bloco "if countdown_timer - last_count"
-# era executado. Agora inicializamos com o tempo atual.
+
 countdown_timer = pygame.time.get_ticks()
 
 run = True
@@ -213,14 +211,14 @@ while run:
     draw_bg()
     
     if countdown > 0:
-        draw_text('GET READY!', font40, white, int(screen_widht/2 - 110), int(screen_height / 2 + 50))
+        draw_text('!PREPARE-SE!', font40, white, int(screen_widht/2 - 110), int(screen_height / 2 + 50))
         draw_text(str(countdown), font40, white, int(screen_widht/2 - 10), int(screen_height / 2 + 100))
         countdown_timer = pygame.time.get_ticks()
         if countdown_timer - last_count > 1000:
             countdown -= 1
-            last_count = countdown_timer
+            last_count = countdown_timer #CRONOMETRO
 
-    if countdown == 0:
+    if countdown == 0:#Quando o temporizador chegar a zero
         time_now = pygame.time.get_ticks()
         if time_now - last_alien_shot > alien_cooldown and len(alien_bullet_group) < 5 and len(alien_group) > 0:
             attacking_alien = random.choice(alien_group.sprites())
@@ -232,23 +230,24 @@ while run:
         game_over = 1
 
     if game_over == 0:
-       
         if len(spaceship_group) == 0:
             game_over = -1
-        else:
+        elif countdown == 0:#Se o player perder toda a vida
             result = spaceship.update()
+            bullet_group.update()
+            alien_group.update()
+            alien_bullet_group.update()
+            
+            
             if result == -1:
                 game_over = -1
 
-        bullet_group.update()
-        alien_group.update()
-        alien_bullet_group.update()
-        
+       
     else:
         if game_over == -1:
             draw_text('GAME OVER!', font40, white, int(screen_widht/2 - 100), int(screen_height / 2 + 50))
         if game_over == 1:
-            draw_text('YOU WIN!', font40, white, int(screen_widht/2 - 100), int(screen_height / 2 + 50))
+            draw_text('!VITÓRIA!', font40, white, int(screen_widht/2 - 100), int(screen_height / 2 + 50))
 
     Explosion_group.update()
 
