@@ -64,7 +64,7 @@ class Spaceship(pygame.sprite.Sprite):
 
     def update(self):
         speed = 4
-        cooldown = 50
+        cooldown = 676
 
         result = 0
 
